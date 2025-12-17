@@ -1,39 +1,34 @@
 'use client';
-
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
 interface Category {
-  id: string;
-  name: string;
-  slug: string;
+  id?: string;
+  name?: string;
+  slug?: string;
   description?: string;
 }
 
 interface SearchAndFilterProps {
-  categories: Category[];
+  categories?: Category[];
 }
 
-export default function SearchAndFilter({ categories }: SearchAndFilterProps) {
+function SearchAndFilterContent({ categories }: SearchAndFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
 
   const updateURL = (search: string, category: string) => {
     const params = new URLSearchParams();
-    
     if (search) {
       params.set('search', search);
     }
-    
     if (category && category !== 'all') {
       params.set('category', category);
     }
-    
     const queryString = params.toString();
-    router.push(queryString ? `?${queryString}` : '/');
+    router.push(queryString ? `/landing?${queryString}` : '/landing');
   };
 
   const handleSearchChange = (value: string) => {
@@ -80,7 +75,7 @@ export default function SearchAndFilter({ categories }: SearchAndFilterProps) {
           className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-[#ff6b7a] focus:border-transparent cursor-pointer"
         >
           <option value="all">All Blogs</option>
-          {categories.map((category) => (
+          {categories?.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
@@ -101,5 +96,19 @@ export default function SearchAndFilter({ categories }: SearchAndFilterProps) {
         </svg>
       </div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense
+export default function SearchAndFilter({ categories }: SearchAndFilterProps) {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        <div className="w-full sm:w-80 h-12 bg-gray-200 rounded-lg animate-pulse" />
+        <div className="w-full sm:w-64 h-12 bg-gray-200 rounded-lg animate-pulse" />
+      </div>
+    }>
+      <SearchAndFilterContent categories={categories} />
+    </Suspense>
   );
 }

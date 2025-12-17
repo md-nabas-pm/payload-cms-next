@@ -7,8 +7,8 @@ import sharp from "sharp";
 
 import { Users } from "./collections/Users";
 import { Media } from "./collections/Media";
-import { Categories } from "./collections/Category";
-import { Posts } from "./collections/Post";
+import { Categories } from "./collections/Categories";
+import { Posts } from "./collections/Posts";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);

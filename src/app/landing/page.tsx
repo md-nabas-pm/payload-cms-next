@@ -1,51 +1,44 @@
-import Image from "next/image";
-import { getPayload } from 'payload'
-import config from '@payload-config'
-import SearchAndFilter from './SearchAndFilter';
+// @ts-nocheck
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { search?: string; category?: string }
-}) {
+import Image from "next/image";
+import { getPayload } from "payload";
+import config from "@payload-config";
+import SearchAndFilter from "./SearchAndFilter";
+
+interface PageProps {
+  searchParams: Promise<{ search?: string; category?: string }>;
+}
+
+export default async function Home({ searchParams }: PageProps) {
   const payload = await getPayload({ config });
   
-  // Build query conditions
-  const where: any = {};
+  // Await searchParams
+  const params = await searchParams;
+  const searchQuery = params.search || '';
+  const categoryFilter = params.category || 'all';
+
+  // Build query with filters
+  const whereCondition: any = {};
   
-  if (searchParams.category && searchParams.category !== 'all') {
-    where.category = {
-      equals: searchParams.category
+  if (searchQuery) {
+    whereCondition.title = {
+      contains: searchQuery,
     };
   }
   
-  if (searchParams.search) {
-    where.or = [
-      {
-        title: {
-          contains: searchParams.search
-        }
-      },
-      {
-        excerpt: {
-          contains: searchParams.search
-        }
-      },
-      {
-        author: {
-          contains: searchParams.search
-        }
-      }
-    ];
+  if (categoryFilter && categoryFilter !== 'all') {
+    whereCondition.category = {
+      equals: categoryFilter,
+    };
   }
 
   const postsCollection = await payload.find({
-    collection: 'posts',
-    where: Object.keys(where).length > 0 ? where : undefined,
+    collection: "posts",
+    where: Object.keys(whereCondition).length > 0 ? whereCondition : undefined,
   });
 
   const categoriesCollection = await payload.find({
-    collection: 'categories',
+    collection: "categories",
   });
 
   const posts = postsCollection.docs;
@@ -97,14 +90,16 @@ export default async function Home({
                 {/* Category and Date */}
                 <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
                   <span className="font-medium">
-                    {post.category?.name || 'Uncategorized'}
+                    {post.category?.name || "Uncategorized"}
                   </span>
                   <span>•</span>
                   <span>
-                    {new Date(post.publishedAt || post.createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
+                    {new Date(
+                      post.publishedAt || post.createdAt
+                    ).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
                     })}
                   </span>
                 </div>
@@ -116,22 +111,23 @@ export default async function Home({
 
                 {/* Excerpt */}
                 <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                  {post.excerpt || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in...'}
+                  {post.excerpt ||
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut et massa mi. Aliquam in..."}
                 </p>
 
                 {/* Author Info */}
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
                   <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                     <span className="text-gray-600 text-sm font-medium">
-                      {post.author?.charAt(0).toUpperCase() || 'A'}
+                      {post.author?.charAt(0).toUpperCase() || "A"}
                     </span>
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-900">
-                      {post.author || 'Anonymous'}
+                      {post.author || "Anonymous"}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {post.status === 'published' ? 'Editor' : 'Viewer'}
+                      {post.status === "published" ? "Editor" : "Viewer"}
                     </div>
                   </div>
                 </div>

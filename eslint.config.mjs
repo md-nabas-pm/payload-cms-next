@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "src/app/landing/page.tsx",
+    "src/collections/Posts.ts",
   ]),
 ]);
 

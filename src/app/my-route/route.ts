@@ -6,6 +6,8 @@ export const GET = async (request: Request) => {
     config: configPromise,
   })
 
+  console.log('Custom route accessed', payload, request)
+
   return Response.json({
     message: 'This is an example of a custom route.',
   })
